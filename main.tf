@@ -15,7 +15,7 @@ module "vpc" {
   public_subnet_cidrs   = ["10.0.1.0/24", "10.0.2.0/24"]
   private_subnet_cidrs  = ["10.0.3.0/24", "10.0.4.0/24"]
   availability_zones    = ["us-east-1a", "us-east-1b"]
-  enable_flow_log       = true
+  enable_flow_log       = false
   vpc_name              = "${random_pet.stack.id}-vpc"
 }
 
@@ -202,37 +202,38 @@ module "web_alb" {
    }
    
 
-module "web_waf" {
-  source = "./modules/waf"
+# module "web_waf" {
+#   source = "./modules/waf"
   
-  name    = "web-waf-${random_pet.stack.id}"
-  alb_arn = module.web_alb.alb_arn
+#   name    = "web-waf-${random_pet.stack.id}"
+#   alb_arn = module.web_alb.alb_arn
 
-  ip_sets = {
-    allowed_ips = {
-      name         = "allowed-ips"
-      description  = "Allowed IP addresses"
-      ip_addresses = ["192.0.2.0/24", "198.51.100.0/24"]
-    }
-  }
+#   ip_sets = {
+#     allowed_ips = {
+#       name         = "allowed-ips"
+#       description  = "Allowed IP addresses"
+#       ip_addresses = ["192.0.2.0/24", "198.51.100.0/24"]
+#     }
+#   }
 
-  rules = [
-    {
-      name     = "allow-specific-ips"
-      priority = 1
-      action   = "allow"
-      type     = "ip_set"
-      ip_set_key = "allowed_ips"
-    },
-    {
-      name     = "limit-requests-per-ip"
-      priority = 2
-      action   = "count"
-      type     = "rate_based"
-      rate_limit = 100
-    }
-  ]
-}
+#   rules = [
+#     {
+#       name     = "allow-specific-ips"
+#       priority = 1
+#       action   = "allow"
+#       type     = "ip_set"
+#       ip_set_key = "allowed_ips"
+#     },
+#     {
+#       name     = "limit-requests-per-ip"
+#       priority = 2
+#       action   = "count"
+#       type     = "rate_based"
+#       rate_limit = 100
+#     }
+#   ]
+# }
+
 # Outputs
 output "vpc_id" {
   value = module.vpc.vpc_id
@@ -246,7 +247,7 @@ output "asg_name" {
   value = module.web_auto_scaling.asg_name
 }
 
-output "waf_web_acl_id" {
-  value = module.web_waf.web_acl_id
-}
+# output "waf_web_acl_id" {
+#   value = module.web_waf.web_acl_id
+# }
 
