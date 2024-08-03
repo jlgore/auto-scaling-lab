@@ -185,24 +185,22 @@ module "web_alb" {
   }
 }
 
-# Auto Scaling Module
-module "web_auto_scaling" {
-  source = "./modules/auto_scaling"
-
-  name               = "web-asg-${random_pet.stack.id}"
-  vpc_id             = module.vpc.vpc_id
-  subnet_ids         = module.vpc.public_subnet_ids
-  target_group_arns  = [module.web_alb.target_group_arns[0]]
-  launch_template_id = module.web_server_launch_template.id
-  
-  min_size         = 1
-  max_size         = 3
-  desired_capacity = 2
-
-  scaling_policy            = "simple"
-  simple_scaling_adjustment = 1
-  simple_scaling_cooldown   = 300
-}
+# Auto Scaling Module w/Target Tracking
+   module "web_auto_scaling" {
+     source = "./modules/auto_scaling"
+     name = "web-asg-${random_pet.stack.id}"
+     vpc_id = module.vpc.vpc_id
+     subnet_ids = module.vpc.public_subnet_ids
+     target_group_arns = [module.web_alb.target_group_arns[0]]
+     launch_template_id = module.web_server_launch_template.id
+     min_size = 1
+     max_size = 5
+     desired_capacity = 2
+     scaling_policy = "target_tracking"
+     target_tracking_metric = "ASGAverageCPUUtilization"
+     target_tracking_target = 50
+   }
+   
 
 module "web_waf" {
   source = "./modules/waf"
