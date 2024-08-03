@@ -8,6 +8,21 @@ This project contains a Terraform module for setting up an Auto Scaling Group (A
 - [AWS CLI](https://aws.amazon.com/cli/) configured with appropriate credentials
 - [Git](https://git-scm.com/downloads)
 
+### Installing Terraform on Amazon Linux 2023
+
+- Install Yum Utils.
+
+`sudo yum install -y yum-utils`
+
+- Add the Hashicorp Repo
+
+`sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo`
+
+- Install Terraform
+
+`sudo yum -y install terraform`
+
+
 ## Deployment Steps
 
 1. Clone the repository:
