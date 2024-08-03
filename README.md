@@ -16,9 +16,13 @@ This project contains a Terraform module for setting up an Auto Scaling Group (A
    cd auto-scaling-lab
    ```
 
-2. Switch to the main branch (if not already on it):
+2. Choose the desired scaling policy by checking out the appropriate branch:
    ```
-   git checkout main
+   git checkout main  # for simple scaling policy
+   # or
+   git checkout target-tracking-policy
+   # or
+   git checkout step-scaling-policy
    ```
 
 3. Initialize Terraform:
@@ -44,17 +48,74 @@ This project contains a Terraform module for setting up an Auto Scaling Group (A
 
 7. Confirm the changes by typing `yes` when prompted.
 
-## Configuration Details
+## Scaling Policies Explained
 
-The main branch uses a simple scaling policy with the following default configuration:
+This project offers three types of scaling policies. Each policy is implemented in a separate branch:
 
-- Minimum size: 1 instance
-- Maximum size: 3 instances
-- Desired capacity: 2 instances
-- Scaling adjustment: 1 instance at a time
-- Cooldown period: 300 seconds (5 minutes)
+### 1. Simple Scaling Policy (main branch)
 
-You can modify these values in the `main.tf` file or by passing variables when calling the module.
+Simple scaling adjusts the number of EC2 instances in the Auto Scaling group based on a single scaling adjustment.
+
+- **Use case**: When you have predictable workload patterns or want to maintain a specific number of instances.
+- **Pros**: Easy to understand and implement.
+- **Cons**: May lead to over-provisioning or under-provisioning as it doesn't consider the magnitude of the alarm breach.
+
+Configuration example:
+```hcl
+scaling_policy = "simple"
+simple_scaling_adjustment = 1
+simple_scaling_cooldown = 300
+```
+
+### 2. Step Scaling Policy (step-scaling-policy branch)
+
+Step scaling policies increase or decrease the current capacity of the Auto Scaling group based on a set of scaling adjustments, known as step adjustments.
+
+- **Use case**: When you want to scale based on the magnitude of the alarm breach.
+- **Pros**: More granular control over scaling actions.
+- **Cons**: Can be complex to set up and tune properly.
+
+Configuration example:
+```hcl
+scaling_policy = "step"
+step_scaling_adjustments = [
+  {
+    scaling_adjustment = 1
+    metric_interval_lower_bound = 0
+    metric_interval_upper_bound = 10
+  },
+  {
+    scaling_adjustment = 2
+    metric_interval_lower_bound = 10
+    metric_interval_upper_bound = 20
+  },
+  {
+    scaling_adjustment = 3
+    metric_interval_lower_bound = 20
+  }
+]
+```
+
+### 3. Target Tracking Scaling Policy (target-tracking-policy branch)
+
+Target tracking scaling policies automatically adjust the number of EC2 instances in your Auto Scaling group to maintain a specified metric at a target value.
+
+- **Use case**: When you want to maintain a specific metric (e.g., average CPU utilization) at a target value.
+- **Pros**: Simplifies scaling by letting AWS manage the scaling process based on a target metric.
+- **Cons**: May not be suitable for applications with wildly fluctuating metrics.
+
+Configuration example:
+```hcl
+scaling_policy = "target_tracking"
+target_tracking_metric = "ASGAverageCPUUtilization"
+target_tracking_target = 50
+```
+
+## Choosing the Right Policy
+
+- Use **Simple Scaling** for basic needs and predictable workloads.
+- Use **Step Scaling** for more granular control over scaling actions based on metric values.
+- Use **Target Tracking** for maintaining a specific metric at a target value with minimal configuration.
 
 ## Cleaning Up
 
@@ -65,16 +126,6 @@ terraform destroy
 ```
 
 Confirm the destruction by typing `yes` when prompted.
-
-## Switching to Other Scaling Policies
-
-To use a different scaling policy, check out the corresponding branch. For example:
-
-```
-git checkout target-tracking-policy
-```
-
-Then follow the deployment steps above.
 
 ## Support
 
