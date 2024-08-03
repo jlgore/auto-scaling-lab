@@ -185,7 +185,7 @@ module "web_alb" {
   }
 }
 
-# Auto Scaling Module w/Target Tracking
+# Auto Scaling Module w/Step Scaling
    module "web_auto_scaling" {
      source = "./modules/auto_scaling"
      name = "web-asg-${random_pet.stack.id}"
@@ -196,9 +196,23 @@ module "web_alb" {
      min_size = 1
      max_size = 5
      desired_capacity = 2
-     scaling_policy = "target_tracking"
-     target_tracking_metric = "ASGAverageCPUUtilization"
-     target_tracking_target = 50
+     scaling_policy = "step"
+     step_scaling_adjustments = [
+       {
+         scaling_adjustment = 1
+         metric_interval_lower_bound = 0
+         metric_interval_upper_bound = 10
+       },
+       {
+         scaling_adjustment = 2
+         metric_interval_lower_bound = 10
+         metric_interval_upper_bound = 20
+       },
+       {
+         scaling_adjustment = 3
+         metric_interval_lower_bound = 20
+       }
+     ]
    }
    
 
