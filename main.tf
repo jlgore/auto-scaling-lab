@@ -248,7 +248,7 @@ output "asg_name" {
   value = module.web_auto_scaling.asg_name
 }
 
-output "waf_web_acl_id" {
-  value = module.web_waf.web_acl_id
-}
+# output "waf_web_acl_id" {
+#   value = module.web_waf.web_acl_id
+# }
 
